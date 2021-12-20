@@ -1,5 +1,6 @@
 package boidobjects
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -29,3 +30,4 @@ func BenchmarkBoids(b *testing.B) {
 		}
 	}
 }
+*/

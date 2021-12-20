@@ -8,9 +8,9 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"github.com/jevans40/go-Boids/boidobjects"
-	"github.com/jevans40/psychic-spork/event"
-	"github.com/jevans40/psychic-spork/game"
+	"github.com/jevans40/Ruthenium/component"
+	"github.com/jevans40/Ruthenium/game"
+	"github.com/jevans40/Ruthenium/world"
 )
 
 var cpuprofile = flag.String("cpuprofile", "cputest", "write cpu profile to `file`")
@@ -31,25 +31,28 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	var newGame game.Game
+	newGame := game.NewGameECS()
 	err := newGame.Init()
 	if err != nil {
 		panic(err)
 	}
+	channel := newGame.GetRenderChannel()
 
-	go func() {
-		events := make([]event.UpdateEvent, 200000)
-		for i := 0; i < 200000; i++ {
-			var newSquare boidobjects.Square
-			newSquare.Init(i)
+	dispatcher := world.NewSimpleDispatcher()
+	transforms := component.NewDenseStorage[world.Transform]()
+	transwrite, _ := component.GetWriteStorage[world.Transform](transforms)
+	sprites := component.NewDenseStorage[world.Sprite]()
+	spritewrite, _ := component.GetWriteStorage[world.Sprite](sprites)
+	rendererService := world.NewRenderService(channel)
+	dispatcher.AddService(rendererService)
+	dispatcher.AddStorage(transforms)
+	dispatcher.AddStorage(sprites)
+	testt := world.Transform{10, 10, 10, 100, 100}
+	tests := world.Sprite{0, 0, 0, 0, 0, [4]uint8{255, 0, 255, 255}}
+	transwrite.AddEntity(component.EntityID(1), testt)
+	spritewrite.AddEntity(component.EntityID(1), tests)
 
-			events[i] = event.UpdateEvent{EventCode: event.UpdateEvent_NewObject,
-				Receiver: -1,
-				Sender:   -1,
-				Event:    event.UpdateEvent_NewObjectEvent{&newSquare}}
-		}
-		newGame.EventChannel <- events
-	}()
+	go update(dispatcher)
 
 	go newGame.Start()
 
@@ -64,5 +67,13 @@ func main() {
 		if err := pprof.WriteHeapProfile(f); err != nil {
 			log.Fatal("could not write memory profile: ", err)
 		}
+	}
+}
+
+func update(dis world.Dispatcher) {
+	for {
+		time.Sleep(time.Millisecond * 10)
+		dis.Maintain()
+
 	}
 }

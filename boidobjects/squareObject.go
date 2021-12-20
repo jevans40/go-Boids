@@ -1,16 +1,8 @@
 package boidobjects
 
-import (
-	"math"
-	"math/rand"
+import ()
 
-	"lukechampine.com/frand"
-
-	"github.com/jevans40/psychic-spork/event"
-	"github.com/jevans40/psychic-spork/linmath"
-	"github.com/jevans40/psychic-spork/objects"
-)
-
+/*
 //Make sure that any game objects actually implement the object interface
 var _ objects.Object = (*Square)(nil)
 
@@ -99,3 +91,4 @@ func (s *Square) SetEnviroment(env objects.ObjEnviroment) {
 	s.env = env
 	//Set Callback
 }
+*/
